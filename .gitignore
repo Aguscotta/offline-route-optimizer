@@ -1,0 +1,19 @@
+# --- Backend (Java / Spring Boot) ---
+target/
+build/
+*.log
+
+# --- Frontend (Angular / Node) ---
+node_modules/
+dist/
+.angular/
+
+# --- IDEs y Editores ---
+.idea/
+.vscode/
+*.iml
+
+# --- Variables de entorno y SO ---
+.env
+.DS_Store
+Thumbs.db
