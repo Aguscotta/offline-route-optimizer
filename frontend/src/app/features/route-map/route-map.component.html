@@ -1,0 +1,92 @@
+<div class="flex h-screen w-screen overflow-hidden bg-slate-900 text-slate-100">
+  <!-- Panel lateral -->
+  <aside class="w-96 flex flex-col border-r border-slate-800 bg-slate-950 p-4">
+    <div class="mb-4">
+      <h1 class="text-xl font-bold text-white">SyncRoute Optimizer</h1>
+      <p class="text-xs text-slate-400">Hacé clic en el mapa para agregar paradas</p>
+    </div>
+
+    <!-- Nombre de ruta -->
+    <input
+      type="text"
+      [ngModel]="routeName()"
+      (ngModelChange)="routeName.set($event)"
+      [disabled]="!!savedRoute()"
+      class="mb-3 w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-white focus:border-blue-500 focus:outline-none"
+      placeholder="Nombre de la ruta"
+    />
+
+    <!-- Botones de acción -->
+    <div class="mb-4 flex gap-2">
+      <button
+        (click)="optimizeRoute()"
+        [disabled]="stops().length < 2 || isOptimizing() || !!savedRoute()"
+        class="flex-1 rounded-lg bg-blue-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-40"
+      >
+        {{ isOptimizing() ? 'Optimizando...' : 'Optimizar Ruta' }}
+      </button>
+
+      <button
+        (click)="clearAll()"
+        class="rounded-lg border border-slate-700 px-3 py-2 text-sm text-slate-300 hover:bg-slate-800"
+      >
+        Limpiar
+      </button>
+    </div>
+
+    <!-- Resumen de distancia -->
+    @if (savedRoute(); as route) {
+    <div class="mb-4 rounded-lg border border-emerald-800 bg-emerald-950/50 p-3 text-sm">
+      <div class="font-semibold text-emerald-400">Ruta optimizada y guardada</div>
+      <div class="text-slate-300">Distancia estimada: <b>{{ route.totalDistanceKm }} km</b></div>
+    </div>
+    }
+
+    <!-- Lista de paradas -->
+    <div class="flex-1 space-y-2 overflow-y-auto pr-1">
+      @for (stop of stops(); track $index) {
+      <div class="rounded-lg border border-slate-800 bg-slate-900 p-3">
+        <div class="flex items-center justify-between gap-2">
+          <div class="flex items-center gap-2">
+              <span
+                class="flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold text-white"
+                [class.bg-green-600]="stop.status === 'DELIVERED'"
+                [class.bg-slate-700]="stop.status !== 'DELIVERED' && $index === 0"
+                [class.bg-blue-600]="stop.status !== 'DELIVERED' && $index > 0"
+              >
+                {{ stop.sequenceOrder ?? $index + 1 }}
+              </span>
+            <input
+              type="text"
+              [(ngModel)]="stop.customerName"
+              [disabled]="!!savedRoute()"
+              class="w-40 bg-transparent text-sm font-medium text-white focus:outline-none"
+            />
+          </div>
+
+          @if (stop.id) {
+          <button
+            (click)="toggleStopStatus(stop)"
+            class="rounded px-2 py-1 text-xs font-medium transition"
+            [class.bg-green-600]="stop.status === 'DELIVERED'"
+            [class.bg-slate-700]="stop.status !== 'DELIVERED'"
+          >
+            {{ stop.status === 'DELIVERED' ? 'Entregado' : 'Marcar' }}
+          </button>
+          }
+        </div>
+        <p class="mt-1 text-xs text-slate-400">{{ stop.address }}</p>
+      </div>
+      } @empty {
+      <div class="mt-10 text-center text-sm text-slate-500">
+        Todavía no hay paradas.<br />Tocá distintos puntos del mapa para empezar.
+      </div>
+      }
+    </div>
+  </aside>
+
+  <!-- Mapa Leaflet -->
+  <main class="relative flex-1">
+    <div id="map" class="h-full w-full"></div>
+  </main>
+</div>
